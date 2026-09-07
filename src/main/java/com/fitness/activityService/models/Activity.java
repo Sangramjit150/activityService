@@ -3,7 +3,9 @@ package com.fitness.activityService.models;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -25,6 +27,9 @@ public class Activity {
     private Integer caloriesBurned;
     private LocalDateTime startTime;
 
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "metrics", columnDefinition = "json")
+    private Map<String, Object> metrics;
 
     @CreationTimestamp
     private LocalDateTime createdAt;
