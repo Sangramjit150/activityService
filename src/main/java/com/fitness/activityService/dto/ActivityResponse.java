@@ -4,6 +4,7 @@ import com.fitness.activityService.models.ActivityType;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Data
 public class ActivityResponse {
@@ -15,5 +16,5 @@ public class ActivityResponse {
     private LocalDateTime startTime;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-
+    private Map<String, Object> additionalMetrics;
 }
