@@ -61,4 +61,10 @@ public class ActivityService {
         activityResponse.setAdditionalMetrics(savedActivity.getMetrics());
         return activityResponse;
     }
+
+    public ActivityResponse getActivityById(Long id) {
+        return activityRepository.findById(id)
+                .map(this::mapToResponse)
+                .orElseThrow(()->new RuntimeException("Activity not found"));
+    }
 }
