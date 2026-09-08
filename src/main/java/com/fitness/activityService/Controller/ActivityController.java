@@ -26,4 +26,9 @@ public class ActivityController {
     public ResponseEntity<List<ActivityResponse>>getActivitiesByUserId(@PathVariable Long id){
         return ResponseEntity.ok(activityService.getActivitiesByUserId(id));
     }
+
+    @GetMapping("/activity/{id}")
+    public ResponseEntity<ActivityResponse>getActivityById(@PathVariable Long id){
+        return ResponseEntity.ok(activityService.getActivityById(id));
+    }
 }
