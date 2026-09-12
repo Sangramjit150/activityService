@@ -5,6 +5,9 @@ import com.fitness.activityService.dto.ActivityRequest;
 import com.fitness.activityService.dto.ActivityResponse;
 import com.fitness.activityService.models.Activity;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -14,9 +17,22 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ActivityService {
     private final ActivityRepository activityRepository;
+    private final RabbitTemplate rabbitTemplate;
+    private final UservalidationService uservalidationService;
+    @Value("${rabbitmq.exchange.name}")
+    private String exchange;
+
+    @Value("${rabbitmq.routing.key}")
+    private String routingKey;
+
     public ActivityResponse trackActivity(ActivityRequest activityRequest) {
+        boolean isValidUser=uservalidationService.validateUser(activityRequest.getUserId());
+        if(!isValidUser){
+            throw new RuntimeException("Invalid user :"+activityRequest.getUserId());
+        }
         Activity activity=new Activity();
         activity.setUserid(activityRequest.getUserId());
         activity.setCaloriesBurned(activityRequest.getCaloriesBurned());
@@ -26,6 +42,14 @@ public class ActivityService {
         activity.setMetrics(activityRequest.getAdditionalMetrics());
 
         Activity savedActivity=activityRepository.save(activity);
+
+        //Publish to RabbitMQ for AI processing
+
+        try {
+            rabbitTemplate.convertAndSend(exchange,routingKey,savedActivity);
+        } catch (Exception e) {
+            log.error("Failed to send to RabbitMQ for processing",e);
+        }
 
         ActivityResponse activityResponse=new ActivityResponse();
         activityResponse.setId(savedActivity.getId());
